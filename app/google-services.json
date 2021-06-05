@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "450611650626",
+    "project_id": "rachelsandwiches",
+    "storage_bucket": "rachelsandwiches.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:450611650626:android:feee595fc0bf85f2adcddb",
+        "android_client_info": {
+          "package_name": "alon.soffer.rachel_sandwitches"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "450611650626-2mcqr2hekmfmeldf2q4hu3m00euafbjc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFBurjOs0pdEHXph_uRiItUCQzzxo41Fg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "450611650626-2mcqr2hekmfmeldf2q4hu3m00euafbjc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
