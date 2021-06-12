@@ -20,6 +20,7 @@ class ReadyActivity : AppCompatActivity() {
         val gotItButton = findViewById<Button>(R.id.gotItButton)
 
         gotItButton.setOnClickListener { v: View? ->
+            // when the got it button is pressed, we want to set the current order to null, remove it from sp, and go to new order activity
             db.collection(RachelApplication.ORDERS_COLLECTION).document(app.currentOrderId).get()
                     .addOnSuccessListener { res: DocumentSnapshot ->
                         val order = res.toObject(SandwichOrder::class.java)

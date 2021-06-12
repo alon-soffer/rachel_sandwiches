@@ -1,7 +1,7 @@
 package alon.soffer.rachel_sandwiches
 
 data class SandwichOrder(
-        val id : String? = null,
+        val id : String? = "",
         var name : String? = null,
         var pickles: Int = 0,
         var hummus: Boolean = false,

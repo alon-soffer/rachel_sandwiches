@@ -10,16 +10,18 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Rachel_Sandwitches">
-        <activity android:name=".ReadyActivity"></activity>
-        <activity android:name=".InProgressActivity" />
-        <activity android:name=".WaitingActivity" />
-        <activity android:name=".NewOrderActivity">
+        <activity android:name=".WelcomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ReadyActivity" />
+        <activity android:name=".InProgressActivity" />
+        <activity android:name=".WaitingActivity" />
+        <activity android:name=".NewOrderActivity" />
+
     </application>
 
 </manifest>
