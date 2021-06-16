@@ -6,6 +6,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import junit.framework.TestCase;
 
 import org.junit.Before;
@@ -25,31 +27,31 @@ import static org.mockito.ArgumentMatchers.eq;
 @Config(sdk = 28)
 public class MainActivityTest extends TestCase {
 
-    private ActivityController<MainActivity> activityController;
-    private TodoItemsHolder mockHolder;
+    private ActivityController<NewOrderActivity> newOrderActivityActivityController;
+    private ActivityController<WaitingActivity> waitingActivityActivityController;
+    private ActivityController<InProgressActivity> inProgressActivityActivityController;
+    private ActivityController<ReadyActivity> readyActivityActivityController;
+
 
     @Before
     public void setup(){
-        mockHolder = Mockito.mock(TodoItemsHolder.class);
-        // when asking the `mockHolder` to get the current items, return an empty list
-        Mockito.when(mockHolder.getCurrentItems())
-                .thenReturn(new ArrayList<>());
-
-        activityController = Robolectric.buildActivity(MainActivity.class);
-
-        // let the activity use our `mockHolder` as the TodoItemsHolder
-        MainActivity activityUnderTest = activityController.get();
-        activityUnderTest.holder = mockHolder;
+        newOrderActivityActivityController = Robolectric.buildActivity(NewOrderActivity.class);
+        waitingActivityActivityController = Robolectric.buildActivity(WaitingActivity.class);
+        inProgressActivityActivityController = Robolectric.buildActivity(InProgressActivity.class);
+        readyActivityActivityController = Robolectric.buildActivity(ReadyActivity.class);
     }
 
     @Test
-    public void when_activityIsLaunched_then_theEditTextStartsEmpty() {
+    public void when_orderButtonClicked_then_waitingActivityIsLunched() {
         // setup
-        activityController.create().visible();
-        MainActivity activityUnderTest = activityController.get();
-        EditText editText = activityUnderTest.findViewById(R.id.editTextInsertTask);
-        String userInput = editText.getText().toString();
+        newOrderActivityActivityController.create().visible();
+        NewOrderActivity activityUnderTest = newOrderActivityActivityController.get();
+
+        View orderButton = activityUnderTest.findViewById(R.id.makeOrderButton);
+        orderButton.performClick();
+
         // verify
+        WaitingActivity waitingActivity =
         assertTrue(userInput.isEmpty());
     }
 
