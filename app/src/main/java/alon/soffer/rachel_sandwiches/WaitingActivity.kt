@@ -12,24 +12,29 @@ import androidx.appcompat.widget.SwitchCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.slider.Slider
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import org.w3c.dom.Document
 
 class WaitingActivity : AppCompatActivity() {
     private var snapshotListener : ListenerRegistration? = null
 
-    private var nameText : TextView? = null
-    private var pickleSlider : Slider? = null
-    private var hummusSwitch : SwitchCompat? = null
-    private var tahiniSwitch : SwitchCompat? = null
-    private var commentText : EditText? = null
+    private lateinit var nameText : TextView
+    private lateinit var pickleSlider : Slider
+    private lateinit var hummusSwitch : SwitchCompat
+    private lateinit var tahiniSwitch : SwitchCompat
+    private lateinit var commentText : EditText
+    private lateinit var app: RachelApplication
+
+    private lateinit var orderObject: SandwichOrder
+    private lateinit var db : FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_waiting)
 
-        val app = applicationContext as RachelApplication
-        val db = app.db
-        var orderObject : SandwichOrder? = null
+        app = applicationContext as RachelApplication
+        db = app.db
 
         /* find UI elements */
         val cancelOrderButton = findViewById<FloatingActionButton>(R.id.cancelOrderButton)
@@ -43,15 +48,7 @@ class WaitingActivity : AppCompatActivity() {
         // get order from DB and set UI accordingly
         db.collection(RachelApplication.ORDERS_COLLECTION).document(app.currentOrderId).get()
                 .addOnSuccessListener { res: DocumentSnapshot ->
-                    val order = res.toObject(SandwichOrder::class.java)
-                    if (order != null) {
-                        orderObject = order
-                        nameText!!.text = order.name
-                        pickleSlider!!.value = order.pickles.toFloat()
-                        hummusSwitch!!.isChecked = order.hummus
-                        tahiniSwitch!!.isChecked = order.tahini
-                        commentText!!.setText(order.comment)
-                    }
+                    onGetOrderFromDb(res)
                 }
                 .addOnFailureListener { //TODO:
                 }
@@ -60,14 +57,7 @@ class WaitingActivity : AppCompatActivity() {
         cancelOrderButton.setOnClickListener { v: View? ->
             db.collection(RachelApplication.ORDERS_COLLECTION).document(app.currentOrderId).delete()
                     .addOnSuccessListener {
-                        val editor = app.sp.edit()
-                        editor.remove(app.currentOrderId)
-                        editor.apply()
-                        app.currentOrderId = null
-
-                        val newOrderIntent = Intent(this, NewOrderActivity::class.java)
-                        startActivity(newOrderIntent)
-                        this.finish()
+                        onDeleteFromDb()
                     }
                     .addOnFailureListener { //TODO:
                     }
@@ -77,11 +67,7 @@ class WaitingActivity : AppCompatActivity() {
         editOrderButton.setOnClickListener { v: View? ->
             if (orderObject != null)
             {
-                orderObject!!.pickles = pickleSlider!!.value.toInt()
-                orderObject!!.hummus = hummusSwitch!!.isChecked
-                orderObject!!.tahini = tahiniSwitch!!.isChecked
-                orderObject!!.comment = commentText!!.text.toString()
-                db.collection(RachelApplication.ORDERS_COLLECTION).document(app.currentOrderId).set(orderObject!!)
+                onEditApprove()
             }
         }
 
@@ -94,19 +80,54 @@ class WaitingActivity : AppCompatActivity() {
             }
             if (snapshot != null && snapshot.exists()) {
                 val order = snapshot.toObject(SandwichOrder::class.java)
-                // if status changed, move to other activity
-                if (order!!.status == RachelApplication.IN_PROGRESS) {
-                    val inProgressIntent = Intent(this, InProgressActivity::class.java)
-                    startActivity(inProgressIntent)
-                    this.finish()
-                } else if (order.status == RachelApplication.READY) {   // TODO: probably redundant
-                    val inProgressIntent = Intent(this, InProgressActivity::class.java)
-                    startActivity(inProgressIntent)
-                    this.finish()
-                }
+                onStatusChange(order)
             }
 
         }
+    }
+
+    private fun onEditApprove() {
+        orderObject.pickles = pickleSlider.value.toInt()
+        orderObject.hummus = hummusSwitch.isChecked
+        orderObject.tahini = tahiniSwitch.isChecked
+        orderObject.comment = commentText.text.toString()
+        db.collection(RachelApplication.ORDERS_COLLECTION).document(app.currentOrderId).set(orderObject)
+    }
+
+    fun onStatusChange(order: SandwichOrder?) {
+        // if status changed, move to other activity
+        if (order!!.status == RachelApplication.IN_PROGRESS) {
+            val inProgressIntent = Intent(this, InProgressActivity::class.java)
+            startActivity(inProgressIntent)
+            this.finish()
+        } else if (order.status == RachelApplication.READY) {   // TODO: probably redundant
+            val inProgressIntent = Intent(this, InProgressActivity::class.java)
+            startActivity(inProgressIntent)
+            this.finish()
+        }
+    }
+
+    private fun onGetOrderFromDb(res : DocumentSnapshot){
+        val order = res.toObject(SandwichOrder::class.java)
+        if (order != null) {
+            orderObject = order
+            nameText.text = order.name
+            pickleSlider.value = order.pickles.toFloat()
+            hummusSwitch.isChecked = order.hummus
+            tahiniSwitch.isChecked = order.tahini
+            commentText.setText(order.comment)
+        }
+    }
+
+    private fun onDeleteFromDb() {
+        val editor = app.sp.edit()
+        editor.remove(app.currentOrderId)
+        editor.apply()
+        app.currentOrderId = null
+
+        val newOrderIntent = Intent(this, NewOrderActivity::class.java)
+        startActivity(newOrderIntent)
+        this.finish()
     }
 
     override fun onDestroy() {
@@ -116,17 +137,17 @@ class WaitingActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putInt("pickles", pickleSlider!!.value.toInt())
-        outState.putBoolean("hummus", hummusSwitch!!.isChecked)
-        outState.putBoolean("tahini", tahiniSwitch!!.isChecked)
-        outState.putString("comments", commentText!!.text.toString())
+        outState.putInt("pickles", pickleSlider.value.toInt())
+        outState.putBoolean("hummus", hummusSwitch.isChecked)
+        outState.putBoolean("tahini", tahiniSwitch.isChecked)
+        outState.putString("comments", commentText.text.toString())
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        pickleSlider!!.value = savedInstanceState.getInt("pickles").toFloat()
-        hummusSwitch!!.isChecked = savedInstanceState.getBoolean("hummus")
-        tahiniSwitch !!.isChecked = savedInstanceState.getBoolean("tahini")
-        commentText!!.setText(savedInstanceState.getString("comments"))
+        pickleSlider.value = savedInstanceState.getInt("pickles").toFloat()
+        hummusSwitch.isChecked = savedInstanceState.getBoolean("hummus")
+        tahiniSwitch .isChecked = savedInstanceState.getBoolean("tahini")
+        commentText.setText(savedInstanceState.getString("comments"))
     }
 }

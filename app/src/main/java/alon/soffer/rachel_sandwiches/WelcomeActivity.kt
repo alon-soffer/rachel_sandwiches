@@ -18,38 +18,7 @@ class WelcomeActivity : AppCompatActivity() {
             db.collection(RachelApplication.ORDERS_COLLECTION).document(app.currentOrderId).get()
                     .addOnSuccessListener { res: DocumentSnapshot ->
                         val order = res.toObject(SandwichOrder::class.java)
-                        if (order != null) {
-                            // if successfully read from db, check status and open the right activity
-                            val status = order.status;
-                            var activityIntent : Intent? = null
-
-                            when (status){
-//                                RachelApplication.DONE -> {
-//                                    //open newOrder activity
-//                                    activityIntent = Intent(this, NewOrderActivity::class.java)
-//                                }
-
-                                RachelApplication.WAITING -> {
-                                    // open waiting wactivity
-                                    activityIntent = Intent(this, WaitingActivity::class.java)
-                                }
-
-                                RachelApplication.IN_PROGRESS -> {
-                                    //open inprogress activity
-                                    activityIntent = Intent(this, InProgressActivity::class.java)
-                                }
-
-                                RachelApplication.READY -> {
-                                    //open ready activity
-                                    activityIntent = Intent(this, ReadyActivity::class.java)
-                                }
-                            }
-                            if (activityIntent != null)
-                            {
-                                startActivity(activityIntent)
-                                this.finish()
-                            }
-                        }
+                        onGotOrderFromDb(order)
                     }
                     .addOnFailureListener { //TODO:
                     }
@@ -58,6 +27,35 @@ class WelcomeActivity : AppCompatActivity() {
             val activityIntent = Intent(this, NewOrderActivity::class.java)
             startActivity(activityIntent)
             this.finish()
+        }
+    }
+
+    fun onGotOrderFromDb(order: SandwichOrder?) {
+        if (order != null) {
+            // if successfully read from db, check status and open the right activity
+            val status = order.status;
+            var activityIntent: Intent? = null
+
+            when (status) {
+                RachelApplication.WAITING -> {
+                    // open waiting wactivity
+                    activityIntent = Intent(this, WaitingActivity::class.java)
+                }
+
+                RachelApplication.IN_PROGRESS -> {
+                    //open inprogress activity
+                    activityIntent = Intent(this, InProgressActivity::class.java)
+                }
+
+                RachelApplication.READY -> {
+                    //open ready activity
+                    activityIntent = Intent(this, ReadyActivity::class.java)
+                }
+            }
+            if (activityIntent != null) {
+                startActivity(activityIntent)
+                this.finish()
+            }
         }
     }
 }

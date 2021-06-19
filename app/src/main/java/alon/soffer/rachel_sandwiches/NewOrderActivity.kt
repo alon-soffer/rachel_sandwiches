@@ -19,13 +19,14 @@ class NewOrderActivity : AppCompatActivity() {
     private var hummusSwitch : SwitchCompat? = null
     private var tahiniSwitch : SwitchCompat? = null
     private var commentText : EditText? = null
+    private lateinit var app : RachelApplication
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_new_order)
 
-        val app = applicationContext as RachelApplication
+        app = applicationContext as RachelApplication
         val db = app.db
 
         /* find UI elements */
@@ -71,18 +72,22 @@ class NewOrderActivity : AppCompatActivity() {
             // if adding to DB is successful, go to next screen and kill this one
             db.collection(RachelApplication.ORDERS_COLLECTION).document(id).set(newOrder)
                     .addOnSuccessListener {
-                        val editor = app.sp.edit()
-                        editor.putString(id, id)    // put the current order in sp
-                        editor.apply()
-                        app.currentOrderId = id     // save current orderId also in application
-
-                        val waitingIntent = Intent(app, WaitingActivity::class.java)
-                        startActivity(waitingIntent)
-                        this.finish()
+                        onDbSuccess(id)
                     }
                     .addOnFailureListener { //TODO: what to do on failure?
                     }
         }
+    }
+
+    fun onDbSuccess(id: String){
+        val editor = app.sp.edit()
+        editor.putString(id, id)    // put the current order in sp
+        editor.apply()
+        app.currentOrderId = id     // save current orderId also in application
+
+        val waitingIntent = Intent(app, WaitingActivity::class.java)
+        startActivity(waitingIntent)
+        this.finish()
     }
 
     override fun onSaveInstanceState(outState: Bundle){

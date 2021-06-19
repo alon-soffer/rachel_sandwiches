@@ -22,6 +22,7 @@ public class RachelApplication extends Application {
     private String currentOrderId = null;
     private SharedPreferences sp = null;
     private String userName = "";
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -63,4 +64,5 @@ public class RachelApplication extends Application {
     public void setUserName(String userName) {
         this.userName = userName;
     }
+
 }

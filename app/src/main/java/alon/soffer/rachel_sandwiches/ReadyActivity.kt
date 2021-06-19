@@ -7,14 +7,18 @@ import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
 
 class ReadyActivity : AppCompatActivity() {
+    private lateinit var app: RachelApplication
+    private lateinit var db: FirebaseFirestore
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ready)
 
-        val app = applicationContext as RachelApplication
-        val db = app.db
+        app = applicationContext as RachelApplication
+        db = app.db
 
         /* find UI elements */
         val gotItButton = findViewById<Button>(R.id.gotItButton)
@@ -27,19 +31,26 @@ class ReadyActivity : AppCompatActivity() {
                         if (order != null) {
                             order.status = RachelApplication.DONE
                             db.collection(RachelApplication.ORDERS_COLLECTION).document(app.currentOrderId).set(order)
-                            val editor = app.sp.edit()
-                            editor.remove(app.currentOrderId)
-                            editor.apply()
-                            app.currentOrderId = null
-
-                            val newOrderIntent = Intent(this, NewOrderActivity::class.java)
-                            startActivity(newOrderIntent)
-                            this.finish()
                         }
+                        onStatusChangedToDone(order)
                     }
                     .addOnFailureListener { //TODO:
                     }
         }
 
+    }
+
+    public fun onStatusChangedToDone(order: SandwichOrder?) {
+
+        if (order != null) {
+            val editor = app.sp.edit()
+            editor.remove(app.currentOrderId)
+            editor.apply()
+            app.currentOrderId = null
+
+            val newOrderIntent = Intent(this, NewOrderActivity::class.java)
+            startActivity(newOrderIntent)
+            this.finish()
+        }
     }
 }
